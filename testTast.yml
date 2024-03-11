@@ -1,0 +1,37 @@
+---
+- name: Test task
+  hosts: red-os-test
+  become: yes
+  tasks:
+    - name: Update packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install packages nginx, mysql, php
+      yum:
+        name:
+          - nginx
+          - mariadb
+          - mariadb-server
+          - php
+        state: present
+
+    - name: Copy nginx config phpinfo
+      copy:
+        src: /filesProjects/phpinfo.conf
+        dest: /etc/nginx/conf.d/phpinfo.conf
+    
+    - name: Copy phpinfo file
+      copy:
+        src: /filesProjects/index.php
+        dest: /var/www/index.php
+
+    - name: Start and autostart services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      with_items:
+        - nginx
+        - mariadb
